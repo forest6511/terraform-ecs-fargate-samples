@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# シークレットを履歴に入れる前に止める。
+#
+# 有効化: git config core.hooksPath .githooks
+#
+# 🔴 一度コミットすると、削除しても git 履歴に永久に残る。
+#    public repo では bot が数分でスキャンする。止めるならここしかない。
+set -uo pipefail
+
+fail=0
+say() { printf '  🔴 %s\n' "$1"; fail=1; }
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+# 1. コミットしてはいけないファイル
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  case "$f" in
+    *.tfstate|*.tfstate.*)   say "tfstate: $f  ← 平文パスワードが入る" ;;
+    .terraform/*|*/.terraform/*) say ".terraform/: $f" ;;
+    crash.log|crash.*.log)   say "crash ログ: $f  ← 変数値がダンプされる" ;;
+    *.pem|*.key|id_rsa|id_ed25519) say "秘密鍵: $f" ;;
+    credentials|*/credentials)     say "認証情報: $f" ;;
+  esac
+  case "$f" in
+    *.tfvars|*.auto.tfvars)
+      case "$f" in *.example|*.sample) ;; *) say "tfvars: $f  ← .example にする" ;; esac ;;
+    .env|.env.*|*/.env|*/.env.*)
+      case "$f" in *.example|*.sample) ;; *) say ".env: $f" ;; esac ;;
+  esac
+done <<< "$staged"
+
+# 2. 中身のシークレット（ステージされた内容だけを見る）
+#    ダミー値は「値そのもの」で判定する。行単位の除外だと同じ行の本物を取りこぼす。
+while IFS= read -r hit; do
+  [ -z "$hit" ] && continue
+  case "$hit" in
+    *AKIAIOSFODNN7EXAMPLE*) continue ;;
+  esac
+  say "アクセスキーID: $hit"
+done <<< "$(git diff --cached -U0 | grep -oE '^\+.*\b(AKIA|ASIA)[0-9A-Z]{16}\b' | sed 's/^\+[[:space:]]*//' || true)"
+
+while IFS= read -r hit; do
+  [ -z "$hit" ] && continue
+  case "$hit" in
+    *123456789012*) continue ;;   # AWS 公式ドキュメントの慣例値
+  esac
+  say "実アカウントIDを含む ARN: $hit  ← data.aws_caller_identity を使う"
+done <<< "$(git diff --cached -U0 | grep -oE '^\+.*arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:[0-9]{12}:' | sed 's/^\+[[:space:]]*//' || true)"
+
+# 3. gitleaks があれば併用
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --no-banner >/dev/null 2>&1 || { say "gitleaks が検出（詳細: gitleaks protect --staged -v）"; }
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "コミットを中止しました。上記を取り除いてください。"
+  echo "（意図的な場合のみ --no-verify。public repo では原則使わない）"
+  exit 1
+fi
+exit 0
