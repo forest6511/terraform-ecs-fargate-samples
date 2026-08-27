@@ -38,3 +38,6 @@ id_ed25519
 *.swp
 
 # 🔴 .terraform.lock.hcl は追跡する（バージョン固定に必要なので ignore しない）
+
+# 第4章の調査用一時ファイル
+netpat.txt
