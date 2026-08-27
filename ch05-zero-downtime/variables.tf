@@ -31,7 +31,9 @@ variable "desired_count" {
 variable "test_listener_port" {
   description = "テストトラフィックを受けるポート。本番の 80 とは分ける"
   type        = number
-  default     = 8080
+  # コンテナのポート(8080)と別の数字にしておく。
+  # 同じにすると本文と画面で「どちらの 8080 か」が紛らわしい
+  default = 9080
 }
 
 variable "deployment_strategy" {
