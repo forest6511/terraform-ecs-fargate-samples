@@ -21,3 +21,9 @@ variable "enable_exec" {
   type        = bool
   default     = false
 }
+
+variable "desired_count" {
+  description = "動かすタスク数。調査を中断するときは 0 にする"
+  type        = number
+  default     = 1
+}

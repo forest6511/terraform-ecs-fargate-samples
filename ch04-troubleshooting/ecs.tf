@@ -73,7 +73,7 @@ resource "aws_ecs_service" "app" {
   name            = "${var.project}-app"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = 1
+  desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
   # 第 4 章: 調査のときだけ true。既存タスクには効かないので入れ替えが要る
