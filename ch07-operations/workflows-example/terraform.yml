@@ -1,0 +1,61 @@
+name: terraform
+
+on:
+  pull_request:
+    paths:
+      - 'ch07-operations/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'ch07-operations/**'
+
+# OIDC のトークンを発行させるために必要。
+# これが無いと id-token が取れず、AWS に入れない
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-1
+  TF_STATE_BUCKET: REPLACE-ME-tfstate-example
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ch07-operations
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # タグではなくコミット SHA で固定する。
+      # タグは同じ名前のまま中身が変わりうる
+      - uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.2
+
+      - name: init
+        run: terraform init -backend-config="bucket=${TF_STATE_BUCKET}"
+
+      - name: fmt
+        run: terraform fmt -check -recursive
+
+      - name: validate
+        run: terraform validate
+
+      # pull request では plan まで。apply しない
+      - name: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -input=false
+
+      # main に入ったときだけ apply する
+      - name: apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -input=false -auto-approve
