@@ -1,4 +1,3 @@
-# file: versions.tf
 terraform {
   required_version = ">= 1.9"
 
@@ -14,7 +13,7 @@ provider "aws" {
   region = var.region
 
   # 以降に作るリソースへ自動でタグを付ける。
-  # コスト配分タグとして有効化すると、本書ぶんの金額だけを抽出できる
+  # あとでコスト配分タグとして有効化すると、本書ぶんの金額だけを抽出できる
   default_tags {
     tags = {
       Project = "terraform-ecs-fargate-book"

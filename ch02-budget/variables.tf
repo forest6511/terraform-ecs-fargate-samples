@@ -1,4 +1,3 @@
-# file: variables.tf
 variable "region" {
   description = "リソースを作成するリージョン"
   type        = string
