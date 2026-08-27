@@ -1,0 +1,40 @@
+# 🔴 Terraform のシークレット（最優先）
+# tfstate には RDS のパスワードや Secrets Manager の値が平文で入る。
+# 一度コミットすると削除しても git の履歴に永久に残る。
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# provider バイナリとバックエンド設定（バケット名などが入る）
+.terraform/
+
+# 変数の実値。認証情報を書きがち。*.tfvars.example は追跡する
+*.tfvars
+*.auto.tfvars
+!*.tfvars.example
+
+# クラッシュ時に変数値がダンプされる
+crash.log
+crash.*.log
+
+# 環境変数・認証情報
+.env
+.env.*
+!.env.example
+.envrc
+credentials
+.aws/
+
+# 秘密鍵・証明書
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# OS / エディタ
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# 🔴 .terraform.lock.hcl は追跡する（バージョン固定に必要なので ignore しない）
