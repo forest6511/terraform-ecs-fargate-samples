@@ -29,10 +29,11 @@ terraform plan -var deployment_strategy=ROLLING
 イメージを ECR へ置いてから `apply` してください。手順は第3章と同じです。
 更新を試すときは `-var image_tag=v2` のようにタグを変えます。
 
-## 🔴 撤収
+## 撤収
 
-この章は移行のあいだタスクが一時的に 2 倍になります。
-確認が終わったら必ず消してください。
+> [!CAUTION]
+> この章は移行のあいだタスクが一時的に 2 倍になります。
+> 確認が終わったら必ず消してください。
 
 ```bash
 terraform apply -var desired_count=0   # まずタスクだけ止める

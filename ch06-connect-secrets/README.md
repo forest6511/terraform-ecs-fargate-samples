@@ -24,12 +24,15 @@ terraform plan
 terraform apply
 ```
 
-## 🔴 注意
+## 注意
 
-- `terraform.tfstate` と保存したプランファイル（`*.tfplan`）には
-  シークレットが平文で入ります。リポジトリに入れないでください
-- 本書の構成は学習用です。本番にそのまま使わないでください
-- 作業が終わったら `terraform destroy` でリソースを削除してください
+> [!CAUTION]
+> `terraform.tfstate` と保存したプランファイル（`*.tfplan`）には
+> シークレットが平文で入ります。リポジトリに入れないでください。
+
+> [!WARNING]
+> - 本書の構成は学習用です。本番にそのまま使わないでください
+> - 作業が終わったら `terraform destroy` でリソースを削除してください
 
 ```bash
 terraform destroy -var "db_password=$TF_VAR_db_password"
