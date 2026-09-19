@@ -5,6 +5,8 @@
 
 > **本書および本リポジトリは Amazon Web Services, Inc. とは無関係の非公式な出版物です。**
 
+Kindle 版: [Terraform で作る Amazon ECS 実践入門](https://www.amazon.co.jp/dp/B0H5WG9QB7)
+
 ## 料金について
 
 > [!CAUTION]
